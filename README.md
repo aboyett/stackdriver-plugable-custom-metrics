@@ -26,3 +26,7 @@ following fields:
 
 Example:
 `{'instance': 'i-18bc2e2c', 'name': 'Mail Queue Size', 'value': 0, 'collected_at': 1379719066}`
+
+### Note
+I am in no way affiliated with Stackdriver. Also this software has no warranty and may very well 
+make your system catch on fire, explode and destroy the fabric of the universe.
