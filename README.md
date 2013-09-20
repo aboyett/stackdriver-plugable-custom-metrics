@@ -1,6 +1,6 @@
 # Stackdriver Pluggable Custom Metrics
 
-This is a pluggable system for [Stackdriver|http://www.stackdriver.com] to handle custom metrics.
+This is a pluggable system for [Stackdriver][http://www.stackdriver.com] to handle custom metrics.
 
 ## Requirements
 I've tried to keep the requirements fairly light, you need Python 2.6 installed on a Linux machine and Factor. 
