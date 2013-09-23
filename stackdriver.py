@@ -23,9 +23,9 @@ class stackdriver(object):
         process = subprocess.Popen( os.path.join(root,file), shell=True, stdout=subprocess.PIPE)
         data = process.stdout.read().rstrip()
         datapoints.append(ast.literal_eval(data))
-    self.send_metric(datapoints)
+    self.send_metric(datapoints, args)
 
-  def send_metric(self, data):
+  def send_metric(self, data, args):
     headers = {
       'content-type': 'application/json',
       'x-stackdriver-apikey': args.key
@@ -43,3 +43,4 @@ class stackdriver(object):
 
 
 stackdriver()
+
