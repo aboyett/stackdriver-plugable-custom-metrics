@@ -18,7 +18,8 @@ class stackdriver(object):
     timestamp = int(time.time())
     epoch = time.gmtime()
     datapoints = []
-    for root, dirs, files in os.walk('modules'):
+    pwd = os.path.dirname(__file__)
+		for root, dirs, files in os.walk(pwd + '/modules'):
       for file in files:
         process = subprocess.Popen( os.path.join(root,file), shell=True, stdout=subprocess.PIPE)
         data = process.stdout.read().rstrip()
