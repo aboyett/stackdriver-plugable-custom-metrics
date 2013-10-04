@@ -14,8 +14,11 @@ class stackdriver_puppet_status(object):
     return resp.content
 
   def get_puppet_status(self):
-    p1 = subprocess.Popen("service puppet status", shell=True, stdout=subprocess.PIPE)
+    p1 = subprocess.Popen("/sbin/service puppet status", shell=True, stdout=subprocess.PIPE)
     status = p1.wait()
+		if status == 127:
+    	p1 = subprocess.Popen("/usr/sbin/service puppet status", shell=True, stdout=subprocess.PIPE)
+    	status = p1.wait()
 
     data_point = {
       'name': 'Puppet Status',
