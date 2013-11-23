@@ -7,6 +7,7 @@ import subprocess
 import os
 import ast
 import argparse
+import re
 
 class stackdriver(object):
 
@@ -24,12 +25,23 @@ class stackdriver(object):
         process = subprocess.Popen( os.path.join(root,file), shell=True, stdout=subprocess.PIPE)
         data = process.stdout.read().rstrip()
         datapoints.append(ast.literal_eval(data))
-    self.send_metric(datapoints, args)
+    if not args.key:
+      api_key = self.check_for_config()
+    else:
+      api_key = args.key
+    self.send_metric(datapoints, api_key)
 
-  def send_metric(self, data, args):
+  def check_for_config(self):
+    with open ("/etc/sysconfig/stackdriver") as cfg:
+      for line in cfg:
+        if re.match('STACKDRIVER_API_KEY',line):
+          key,val = line.split("=")
+          return re.sub(r'^"|"$', '', val).rstrip()
+
+  def send_metric(self, data, key):
     headers = {
       'content-type': 'application/json',
-      'x-stackdriver-apikey': args.key
+      'x-stackdriver-apikey': key
     }
     gateway_msg = {
       'timestamp': int(time.time()),
@@ -42,6 +54,4 @@ class stackdriver(object):
       headers=headers)
     assert resp.ok, 'Failed to submit custom metric.'
 
-
 stackdriver()
-
