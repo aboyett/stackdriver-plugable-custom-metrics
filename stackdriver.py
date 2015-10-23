@@ -10,7 +10,7 @@ import argparse
 import re
 
 
-class stackdriver(object):
+class Stackdriver(object):
 
     def __init__(self):
         parser = argparse.ArgumentParser(
@@ -18,14 +18,12 @@ class stackdriver(object):
         parser.add_argument('--key', help='stackdriver api key', nargs='?')
         args = parser.parse_args()
 
-        timestamp = int(time.time())
-        epoch = time.gmtime()
         datapoints = []
         pwd = os.path.dirname(os.path.abspath(__file__))
-        for root, dirs, files in os.walk(pwd + '/modules'):
-            for file in files:
+        for root, _, files in os.walk(pwd + '/modules'):
+            for module in files:
                 process = subprocess.Popen(os.path.join(
-                    root, file), shell=True, stdout=subprocess.PIPE)
+                    root, module), shell=True, stdout=subprocess.PIPE)
                 data = process.stdout.read().rstrip()
                 datapoints.append(ast.literal_eval(data))
         if not args.key:
@@ -38,16 +36,17 @@ class stackdriver(object):
         with open("/etc/sysconfig/stackdriver") as cfg:
             for line in cfg:
                 if re.match('STACKDRIVER_API_KEY', line):
-                    key, val = line.split("=")
+                    _, _, val = line.partition("=")
                     return re.sub(r'^"|"$', '', val).rstrip()
 
     def send_metric(self, data, key):
+        epoch = int(time.time())
         headers = {
             'content-type': 'application/json',
             'x-stackdriver-apikey': key
         }
         gateway_msg = {
-            'timestamp': int(time.time()),
+            'timestamp': epoch,
             'proto_version': 1,
             'data': data,
         }
@@ -57,4 +56,4 @@ class stackdriver(object):
             headers=headers)
         assert resp.ok, 'Failed to submit custom metric.'
 
-stackdriver()
+Stackdriver()

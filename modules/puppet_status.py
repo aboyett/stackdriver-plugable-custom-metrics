@@ -5,7 +5,7 @@ import requests
 import time
 
 
-class stackdriver_puppet_status(object):
+class StackdriverPuppetStatus(object):
 
     def __init__(self):
         self.get_puppet_status()
@@ -16,13 +16,13 @@ class stackdriver_puppet_status(object):
         return resp.content
 
     def get_puppet_status(self):
-        p1 = subprocess.Popen("/sbin/service puppet status",
-                              shell=True, stdout=subprocess.PIPE)
-        status = p1.wait()
+        proc1 = subprocess.Popen("/sbin/service puppet status",
+                                 shell=True, stdout=subprocess.PIPE)
+        status = proc1.wait()
         if status == 127:
-            p1 = subprocess.Popen(
+            proc1 = subprocess.Popen(
                 "/usr/sbin/service puppet status", shell=True, stdout=subprocess.PIPE)
-            status = p1.wait()
+            status = proc1.wait()
 
         data_point = {
             'name': 'Puppet Status',
@@ -33,4 +33,4 @@ class stackdriver_puppet_status(object):
 
         print data_point
 
-stackdriver_puppet_status()
+StackdriverPuppetStatus()

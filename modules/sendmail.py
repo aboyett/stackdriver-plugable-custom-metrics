@@ -5,7 +5,7 @@ import requests
 import time
 
 
-class stackdriver_sendmail(object):
+class StackdriverSendmail(object):
 
     def __init__(self):
         self.get_mailqueue()
@@ -16,14 +16,14 @@ class stackdriver_sendmail(object):
         return resp.content
 
     def get_mailqueue(self):
-        p1 = subprocess.Popen("/usr/bin/mailq", shell=True,
-                              stdout=subprocess.PIPE)
-        p2 = subprocess.Popen("grep Total", shell=True,
-                              stdin=p1.stdout, stdout=subprocess.PIPE)
-        p3 = subprocess.Popen("cut -d: -f2", shell=True,
-                              stdin=p2.stdout, stdout=subprocess.PIPE)
+        proc1 = subprocess.Popen("/usr/bin/mailq", shell=True,
+                                 stdout=subprocess.PIPE)
+        proc2 = subprocess.Popen("grep Total", shell=True,
+                                 stdin=proc1.stdout, stdout=subprocess.PIPE)
+        proc3 = subprocess.Popen("cut -d: -f2", shell=True,
+                                 stdin=proc2.stdout, stdout=subprocess.PIPE)
         data = 0
-        for values in p3.stdout:
+        for values in proc3.stdout:
             data = int(values.lstrip().rstrip()) + data
 
         data_point = {
@@ -35,4 +35,4 @@ class stackdriver_sendmail(object):
 
         print data_point
 
-stackdriver_sendmail()
+StackdriverSendmail()
