@@ -33,4 +33,5 @@ class StackdriverPuppetStatus(object):
 
         print data_point
 
-StackdriverPuppetStatus()
+if __name__ == '__main__':
+    StackdriverPuppetStatus()

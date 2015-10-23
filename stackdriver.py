@@ -56,4 +56,5 @@ class Stackdriver(object):
             headers=headers)
         assert resp.ok, 'Failed to submit custom metric.'
 
-Stackdriver()
+if __name__ == '__main__':
+    Stackdriver()

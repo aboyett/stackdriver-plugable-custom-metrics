@@ -35,4 +35,5 @@ class StackdriverSendmail(object):
 
         print data_point
 
-StackdriverSendmail()
+if __name__ == '__main__':
+    StackdriverSendmail()
