@@ -5,7 +5,6 @@ import json
 import time
 import subprocess
 import os
-import ast
 import argparse
 import re
 
@@ -25,7 +24,7 @@ class Stackdriver(object):
                 process = subprocess.Popen(os.path.join(
                     root, module), shell=True, stdout=subprocess.PIPE)
                 data = process.stdout.read().rstrip()
-                datapoints.append(ast.literal_eval(data))
+                datapoints.append(json.loads(data))
         if not args.key:
             api_key = self.check_for_config()
         else:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import subprocess
 import requests
 import time
@@ -33,7 +34,7 @@ class StackdriverSendmail(object):
             'instance': self.get_instance_id(),
         }
 
-        print data_point
+        print json.dumps(data_point)
 
 if __name__ == '__main__':
     StackdriverSendmail()
