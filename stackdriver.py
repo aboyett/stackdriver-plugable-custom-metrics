@@ -9,7 +9,7 @@ import argparse
 import re
 
 
-class Stackdriver(object):
+class MetricReporter(object):
     FAILED_MODULE_METRIC = "stackdriver.failed_modules"
 
     def __init__(self):
@@ -97,4 +97,4 @@ def get_ec2_instance_id():
     return ec2_id
 
 if __name__ == '__main__':
-    Stackdriver()
+    MetricReporter()
