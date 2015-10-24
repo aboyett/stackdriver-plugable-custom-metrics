@@ -34,17 +34,10 @@ class MetricReporter(object):
                     self.failed_modules += 1
         datapoints.append(create_datapoint(self.FAILED_MODULE_METRIC, self.failed_modules))
         if not args.key:
-            api_key = self.check_for_config()
+            api_key = check_for_config()
         else:
             api_key = args.key
         self.send_metric(datapoints, api_key)
-
-    def check_for_config(self):
-        with open("/etc/sysconfig/stackdriver") as cfg:
-            for line in cfg:
-                if re.match('STACKDRIVER_API_KEY', line):
-                    _, _, val = line.partition("=")
-                    return re.sub(r'^"|"$', '', val).rstrip()
 
     def send_metric(self, data, key):
         epoch = int(time.time())
@@ -62,6 +55,14 @@ class MetricReporter(object):
             data=json.dumps(gateway_msg),
             headers=headers)
         assert resp.ok, 'Failed to submit custom metric.'
+
+def check_for_config():
+    with open("/etc/sysconfig/stackdriver") as cfg:
+        for line in cfg:
+            if re.match('STACKDRIVER_API_KEY', line):
+                _, _, val = line.partition("=")
+                return re.sub(r'^"|"$', '', val).rstrip()
+
 
 def create_datapoint(name, value, include_id=True, instance_id=None, collected_at=None):
     """
