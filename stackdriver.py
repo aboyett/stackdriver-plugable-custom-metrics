@@ -10,8 +10,10 @@ import re
 
 
 class Stackdriver(object):
+    FAILED_MODULE_METRIC = "stackdriver.failed_modules"
 
     def __init__(self):
+        self.failed_modules = 0
         parser = argparse.ArgumentParser(
             description='Stackdriver Custom Metrics')
         parser.add_argument('--key', help='stackdriver api key', nargs='?')
@@ -29,6 +31,8 @@ class Stackdriver(object):
                     datapoints.append(jsondata)
                 except ValueError:
                     print "Failed to parse output from {module}".format(module=module)
+                    self.failed_modules += 1
+        datapoints.append(create_datapoint(self.FAILED_MODULE_METRIC, self.failed_modules))
         if not args.key:
             api_key = self.check_for_config()
         else:
