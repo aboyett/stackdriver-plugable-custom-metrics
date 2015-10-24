@@ -12,27 +12,34 @@ import re
 class MetricReporter(object):
     FAILED_MODULE_METRIC = "stackdriver.failed_modules"
 
-    def __init__(self, api_key=None):
+    def __init__(self, api_key=None, modules=None, module_dir=None):
         if api_key:
             self.api_key = api_key
         else:
             self.api_key = check_for_config()
 
+        if not modules and not module_dir:
+            raise RuntimeError("Either modules or module_dir argument must be provided")
+        elif modules:
+            self.modules = modules
+        else:
+            self.modules = generate_module_list(module_dir)
+
+        self.run()
+
+    def run(self):
         self.failed_modules = 0
         datapoints = []
 
-        pwd = os.path.dirname(os.path.abspath(__file__))
-        for root, _, files in os.walk(pwd + '/modules'):
-            for module in files:
-                process = subprocess.Popen(os.path.join(
-                    root, module), shell=True, stdout=subprocess.PIPE)
-                data = process.stdout.read().rstrip()
-                try:
-                    jsondata = json.loads(data)
-                    datapoints.append(jsondata)
-                except ValueError:
-                    print "Failed to parse output from {module}".format(module=module)
-                    self.failed_modules += 1
+        for module in self.modules:
+            process = subprocess.Popen(module, shell=True, stdout=subprocess.PIPE)
+            data = process.stdout.read().rstrip()
+            try:
+                jsondata = json.loads(data)
+                datapoints.append(jsondata)
+            except ValueError:
+                print "Failed to parse output from {module}".format(module=module)
+                self.failed_modules += 1
         datapoints.append(create_datapoint(self.FAILED_MODULE_METRIC, self.failed_modules))
         self.send_metric(datapoints)
 
@@ -102,6 +109,17 @@ def create_datapoint(name, value, include_id=True, instance_id=None, collected_a
 
     return json.dumps(datapoint)
 
+def generate_module_list(module_dir):
+    mod_list = []
+    # produce list of all executable files in mod_dir
+    for root, _, files in os.walk(module_dir):
+        for mod in files:
+            module_path = os.path.join(root, mod)
+            if os.access(module_path, os.X_OK):
+                mod_list.append(module_path)
+
+    return mod_list
+
 def get_ec2_instance_id():
     ec2_metadata_id_url = 'http://169.254.169.254/latest/meta-data/instance-id'
 
@@ -114,16 +132,20 @@ def get_ec2_instance_id():
     return ec2_id
 
 def main():
+    pwd = os.path.dirname(os.path.abspath(__file__))
     parser = argparse.ArgumentParser(
         description='Stackdriver Custom Metrics')
-    parser.add_argument('--key', help='stackdriver api key', nargs='?')
+    parser.add_argument('--key', help='stackdriver api key')
+    parser.add_argument('--module-dir', dest="module_dir", help='directory of modules',
+                        default=os.path.join(pwd, 'modules'))
     args = parser.parse_args()
 
-    if args.key:
-        api_key = args.key
-    else:
-        api_key = None
-    MetricReporter(api_key=api_key)
+    api_key = args.key if args.key else None
+    module_dir = args.module_dir
+
+    print module_dir
+
+    MetricReporter(api_key=api_key, module_dir=module_dir)
 
 if __name__ == '__main__':
     main()
