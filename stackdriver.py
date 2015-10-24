@@ -12,14 +12,15 @@ import re
 class MetricReporter(object):
     FAILED_MODULE_METRIC = "stackdriver.failed_modules"
 
-    def __init__(self):
-        self.failed_modules = 0
-        parser = argparse.ArgumentParser(
-            description='Stackdriver Custom Metrics')
-        parser.add_argument('--key', help='stackdriver api key', nargs='?')
-        args = parser.parse_args()
+    def __init__(self, api_key=None):
+        if api_key:
+            self.api_key = api_key
+        else:
+            self.api_key = check_for_config()
 
+        self.failed_modules = 0
         datapoints = []
+
         pwd = os.path.dirname(os.path.abspath(__file__))
         for root, _, files in os.walk(pwd + '/modules'):
             for module in files:
@@ -33,17 +34,13 @@ class MetricReporter(object):
                     print "Failed to parse output from {module}".format(module=module)
                     self.failed_modules += 1
         datapoints.append(create_datapoint(self.FAILED_MODULE_METRIC, self.failed_modules))
-        if not args.key:
-            api_key = check_for_config()
-        else:
-            api_key = args.key
-        self.send_metric(datapoints, api_key)
+        self.send_metric(datapoints)
 
-    def send_metric(self, data, key):
+    def send_metric(self, data):
         epoch = int(time.time())
         headers = {
             'content-type': 'application/json',
-            'x-stackdriver-apikey': key
+            'x-stackdriver-apikey': self.api_key
         }
         gateway_msg = {
             'timestamp': epoch,
@@ -61,7 +58,8 @@ def check_for_config():
     parse the stackdriver-extractor config file if it exists (this exists on both .deb and .rpm
     distros) and if it doesn't exist for whatever reason, try to parse stackdriver sysconfig file.
     """
-    # TODO: handle case where both fall through
+    api_key = None
+
     extractor_loc = "/opt/stackdriver/extractor/etc/extractor.conf"
     sysconfig_loc = "/etc/sysconfig/stackdriver"
 
@@ -75,6 +73,10 @@ def check_for_config():
                 if re.match('STACKDRIVER_API_KEY', line):
                     _, _, val = line.partition("=")
                     api_key = re.sub(r'^"|"$', '', val).rstrip()
+
+    if not api_key:
+        raise RuntimeError("Cannot locate a Stackdriver API key, please provide one.")
+
     return api_key
 
 
@@ -111,5 +113,17 @@ def get_ec2_instance_id():
 
     return ec2_id
 
+def main():
+    parser = argparse.ArgumentParser(
+        description='Stackdriver Custom Metrics')
+    parser.add_argument('--key', help='stackdriver api key', nargs='?')
+    args = parser.parse_args()
+
+    if args.key:
+        api_key = args.key
+    else:
+        api_key = None
+    MetricReporter(api_key=api_key)
+
 if __name__ == '__main__':
-    MetricReporter()
+    main()
