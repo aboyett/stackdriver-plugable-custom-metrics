@@ -59,6 +59,28 @@ class Stackdriver(object):
             headers=headers)
         assert resp.ok, 'Failed to submit custom metric.'
 
+def create_datapoint(name, value, include_id=True, instance_id=None, collected_at=None):
+    """
+    creates a datapoint with the values of name, value, instance_id and collected_at
+    if include_id is False the datapoint will lack the instance_id field
+    if instance_id is not specified it will be set to the EC2 instance id of the local machine
+    collected_at should be the epoch time of data collection (seconds since 1970-01-01 00:00 UTC)
+    if collected_at is not specified it will be set to the current time
+    """
+    datapoint = {}
+    datapoint['name'] = name
+    datapoint['value'] = value
+
+    datapoint['collected_at'] = collected_at if collected_at is not None else int(time.time())
+
+    if include_id:
+        if instance_id is None:
+            datapoint['instance_id'] = get_ec2_instance_id()
+        else:
+            datapoint['instance_id'] = instance_id
+
+    return json.dumps(datapoint)
+
 def get_ec2_instance_id():
     ec2_metadata_id_url = 'http://169.254.169.254/latest/meta-data/instance-id'
 
