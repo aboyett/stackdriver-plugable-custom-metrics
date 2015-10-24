@@ -59,5 +59,16 @@ class Stackdriver(object):
             headers=headers)
         assert resp.ok, 'Failed to submit custom metric.'
 
+def get_ec2_instance_id():
+    ec2_metadata_id_url = 'http://169.254.169.254/latest/meta-data/instance-id'
+
+    try:
+        ec2_id = requests.get(ec2_metadata_id_url).text
+    except requests.exceptions.ConnectionError:
+        # assume we aren't running in EC2 if we can't connect to metadata server
+        ec2_id = None
+
+    return ec2_id
+
 if __name__ == '__main__':
     Stackdriver()
