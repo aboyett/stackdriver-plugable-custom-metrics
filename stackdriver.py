@@ -57,11 +57,25 @@ class MetricReporter(object):
         assert resp.ok, 'Failed to submit custom metric.'
 
 def check_for_config():
-    with open("/etc/sysconfig/stackdriver") as cfg:
-        for line in cfg:
-            if re.match('STACKDRIVER_API_KEY', line):
-                _, _, val = line.partition("=")
-                return re.sub(r'^"|"$', '', val).rstrip()
+    """
+    parse the stackdriver-extractor config file if it exists (this exists on both .deb and .rpm
+    distros) and if it doesn't exist for whatever reason, try to parse stackdriver sysconfig file.
+    """
+    # TODO: handle case where both fall through
+    extractor_loc = "/opt/stackdriver/extractor/etc/extractor.conf"
+    sysconfig_loc = "/etc/sysconfig/stackdriver"
+
+    if os.path.exists(extractor_loc):
+        with open(extractor_loc) as cfg:
+            expr = re.compile("^apikey=")
+            _, _, api_key = filter(expr.search, cfg.readlines())[0].partition('=').strip()
+    elif os.path.exists(sysconfig_loc):
+        with open(sysconfig_loc) as cfg:
+            for line in cfg:
+                if re.match('STACKDRIVER_API_KEY', line):
+                    _, _, val = line.partition("=")
+                    api_key = re.sub(r'^"|"$', '', val).rstrip()
+    return api_key
 
 
 def create_datapoint(name, value, include_id=True, instance_id=None, collected_at=None):
