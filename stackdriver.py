@@ -24,7 +24,11 @@ class Stackdriver(object):
                 process = subprocess.Popen(os.path.join(
                     root, module), shell=True, stdout=subprocess.PIPE)
                 data = process.stdout.read().rstrip()
-                datapoints.append(json.loads(data))
+                try:
+                    jsondata = json.loads(data)
+                    datapoints.append(jsondata)
+                except ValueError:
+                    print "Failed to parse output from {module}".format(module=module)
         if not args.key:
             api_key = self.check_for_config()
         else:
