@@ -10,7 +10,7 @@ import re
 
 
 class MetricReporter(object):
-    FAILED_MODULE_METRIC = "stackdriver.failed_modules"
+    FAILED_METRIC = "stackdriver.failures"
 
     def __init__(self, api_key=None, modules=None, module_dir=None):
         if api_key:
@@ -28,19 +28,26 @@ class MetricReporter(object):
         self.run()
 
     def run(self):
-        self.failed_modules = 0
+        self.failures = 0
         datapoints = []
 
         for module in self.modules:
             process = subprocess.Popen(module, shell=True, stdout=subprocess.PIPE)
-            data = process.stdout.read().rstrip()
-            try:
-                jsondata = json.loads(data)
-                datapoints.append(jsondata)
-            except ValueError:
-                print "Failed to parse output from {module}".format(module=module)
-                self.failed_modules += 1
-        datapoints.append(create_datapoint(self.FAILED_MODULE_METRIC, self.failed_modules))
+            data = process.stdout.readlines()
+            if len(data):
+                for line in data:
+                    try:
+                        jsondata = json.loads(line)
+                        datapoints.append(jsondata)
+                    except ValueError:
+                        msg = "Failed to parse datapoint from {module}: {datapoint}"
+                        print msg.format(module=module, datapoint=line)
+                        self.failures += 1
+            else:
+                print "No output from {module}".format(module=module)
+                self.failures += 1
+
+        datapoints.append(create_datapoint(self.FAILED_METRIC, self.failures))
         self.send_metric(datapoints)
 
     def send_metric(self, data):
