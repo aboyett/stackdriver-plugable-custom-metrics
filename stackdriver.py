@@ -110,9 +110,9 @@ def create_datapoint(name, value, include_id=True, instance_id=None, collected_a
 
     if include_id:
         if instance_id is None:
-            datapoint['instance_id'] = get_ec2_instance_id()
+            datapoint['instance'] = get_ec2_instance_id()
         else:
-            datapoint['instance_id'] = instance_id
+            datapoint['instance'] = instance_id
 
     return json.dumps(datapoint)
 
