@@ -48,7 +48,8 @@ class MetricReporter(object):
                 self.failures += 1
 
         datapoints.append(create_datapoint(self.FAILED_METRIC, self.failures))
-        self.send_metric(datapoints)
+        if len(datapoints):
+            self.send_metric(datapoints)
 
     def send_metric(self, data):
         epoch = int(time.time())
