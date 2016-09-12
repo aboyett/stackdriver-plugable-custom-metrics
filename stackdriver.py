@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-import requests
-import json
-import time
-import subprocess
-import os
 import argparse
+import json
+import os
 import re
+import subprocess
+import time
 
+import requests
 
 class MetricReporter(object):
     FAILED_METRIC = "stackdriver.failures"
