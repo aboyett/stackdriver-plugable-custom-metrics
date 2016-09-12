@@ -81,7 +81,8 @@ def check_for_config():
     if os.path.exists(extractor_loc):
         with open(extractor_loc) as cfg:
             expr = re.compile("^apikey=")
-            _, _, api_key = filter(expr.search, cfg.readlines())[0].partition('=').strip()
+            _, _, api_key = filter(expr.search, cfg.readlines())[0].partition('=')
+            api_key = api_key.strip()
     elif os.path.exists(sysconfig_loc):
         with open(sysconfig_loc) as cfg:
             for line in cfg:
