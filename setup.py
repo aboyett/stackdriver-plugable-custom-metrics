@@ -8,7 +8,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='stackdriver-custom-metrics',
-    version='0.1.0-dev',
+    version='0.1.0',
     long_description=__doc__,
     packages=find_packages(),
     include_package_data=True,
