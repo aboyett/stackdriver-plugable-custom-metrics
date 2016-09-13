@@ -47,7 +47,7 @@ class MetricReporter(object):
                 print "No output from {module}".format(module=module)
                 self.failures += 1
 
-        datapoints.append(create_datapoint(self.FAILED_METRIC, self.failures))
+        datapoints.append(json.loads(create_datapoint(self.FAILED_METRIC, self.failures)))
         if len(datapoints):
             self.send_metric(datapoints)
 
