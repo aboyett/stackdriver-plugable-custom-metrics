@@ -36,6 +36,7 @@ make your system catch on fire, explode and destroy the fabric of the universe.
 Stackdriver Pluggable Custom Metrics is licensed under a standard 3-clause BSD license.
 
 Copyright (c) 2013, David Kerr All rights reserved.
+Copyright (c) 2015,2016 Andy Boyett, CloudPhysics Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
