@@ -38,6 +38,9 @@ class MetricReporter(object):
                 for line in data:
                     try:
                         jsondata = json.loads(line)
+                        # coerce collection time to int. stackdriver rejects floats
+                        jsondata['collected_at'] = int(jsondata['collected_at'])
+
                         datapoints.append(jsondata)
                     except ValueError:
                         msg = "Failed to parse datapoint from {module}: {datapoint}"
